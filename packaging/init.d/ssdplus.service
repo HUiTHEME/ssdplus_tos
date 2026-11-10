@@ -1,7 +1,10 @@
 [Unit]
 Description=SSD Assistant - SSD health, SMART and lifespan monitor
 Documentation=https://github.com/HUiTHEME/ssdplus_tos
-After=network.target
+# tnas-mntdata.service 是 TOS 挂数据卷的那个 oneshot（RemainAfterExit=yes），
+# 应用目录在 /Volume1 上，排在它后面才不会在卷还没挂上时就去启动。
+# 平台自己的 application.service 也是这么排的。
+After=network.target tnas-mntdata.service
 # 崩溃循环保护：60 秒内最多拉起 5 次，超了 systemd 会停下并标记失败。
 # （Restart= / RestartSec= 按平台规范不在这里配置，重启策略由 TOS 管理。）
 StartLimitBurst=5
@@ -15,12 +18,15 @@ User=ssdplus
 Group=allusers
 WorkingDirectory=/usr/local/ssdplus
 EnvironmentFile=-/usr/local/ssdplus/ssdplus.env
+# 开机时数据卷可能比这个单元晚一步就绪，先等应用目录真的出现再拉起服务；
+# 循环本身没有上限，由 TimeoutStartSec 兜底（150 秒等不到就判定启动失败）。
+ExecStartPre=/bin/sh -c 'until test -x /usr/local/ssdplus/bin/ssdplus; do sleep 2; done'
 # 只监听 /var/api/ssdplus.sock，不占用任何 TCP 端口，全部流量走平台代理。
 ExecStart=/usr/local/ssdplus/bin/ssdplus
 # /var/api 是 1777 共享目录，socket 可能被别的用户残留文件占住导致 rm EPERM；
 # 前面加 "-" 让一次正常停机不会被记成「停用失败」。
 ExecStopPost=-/bin/rm -f /var/api/ssdplus.sock
-TimeoutStartSec=30
+TimeoutStartSec=150
 TimeoutStopSec=10
 KillMode=control-group
 KillSignal=SIGTERM
@@ -43,8 +49,9 @@ LockPersonality=true
 #   CAP_SYS_RAWIO       SATA 的 ATA passthrough
 AmbientCapabilities=CAP_DAC_READ_SEARCH CAP_SYS_ADMIN CAP_SYS_RAWIO
 CapabilityBoundingSet=CAP_DAC_READ_SEARCH CAP_SYS_ADMIN CAP_SYS_RAWIO
-# ProtectSystem=strict 下 /usr/local 只读，数据、日志与 socket 目录必须显式放开
-ReadWritePaths=/usr/local/ssdplus/data /usr/local/ssdplus/logs /var/api
+# ProtectSystem=strict 下 /usr/local 只读，数据、日志与 socket 目录必须显式放开。
+# 前面加 "-"：路径不存在时不报错（开机早期数据卷可能还没挂上，不能让沙箱准备失败）。
+ReadWritePaths=-/usr/local/ssdplus/data -/usr/local/ssdplus/logs -/var/api
 LimitNOFILE=65536
 LimitNPROC=512
 MemoryMax=512M

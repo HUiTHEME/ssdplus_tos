@@ -139,6 +139,12 @@ CapabilityBoundingSet=CAP_DAC_READ_SEARCH CAP_SYS_ADMIN CAP_SYS_RAWIO
 5. **systemd 细节**：应用用户的主组是 `allusers`（没有同名组，写 `Group=ssdplus` 会 216/GROUP）；
    不能用 `PrivateTmp`（`/var/api` 是 `/tmp/api` 的软链），不能用 `PrivateDevices`
    （要读设备节点）。
+6. **开机自启**：`/etc/systemd/system/ssdplus.service` 必须是**实体文件**，不能软链到
+   `/usr/local/ssdplus/init.d/`。应用目录在数据卷 `/Volume1` 上，开机早期卷还没挂载，
+   systemd 解析软链会拿到 ENOENT（`Failed to open ...: No such file or directory`）后
+   直接跳过该单元——表现就是重启后应用不自启。另外单元里用
+   `After=tnas-mntdata.service` 排在数据卷挂载之后，并用
+   `ExecStartPre` 等应用目录真正出现再拉起服务。
 
 ## 本地预览
 

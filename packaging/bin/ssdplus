@@ -34,7 +34,10 @@ if [ -z "$PY" ]; then
     exit 1
 fi
 
-mkdir -p "$DATA" "$DATA/etc" "$APP/logs" /var/api
+mkdir -p "$DATA" "$DATA/etc" "$APP/logs"
+# /var/api 是平台建的（指向 /tmp/api），开机早期可能还没生成；
+# 这里只是补一次，失败不能让整个启动器退出——列在前面跟着一起 set -e 会误杀。
+[ -d /var/api ] || mkdir -p /var/api 2>/dev/null || true
 
 # 只监听 Unix Socket，不占 TCP 端口。
 # --prefix 写 /ssdplus：平台网关正常会把 /v2/proxy/ssdplus 剥掉再转发，

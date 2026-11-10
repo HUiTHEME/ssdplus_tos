@@ -52,9 +52,16 @@ if [ -d /usr/www ] && [ -d "${APP}/webui" ] && [ ! -e "/usr/www/${APPID}" ]; the
     ln -sfn "${APP}/webui" "/usr/www/${APPID}" 2>/dev/null || true
 fi
 
-# TOS 要求 unit 文件放在应用目录 /usr/local/<appid>/init.d/ 下，
-# 但 systemd 不会自己扫描那里，需要一条指向 /etc/systemd/system 的链接。
-ln -sf "${UNIT_SRC}" "${UNIT_DST}"
+# TOS 要求 unit 文件放在应用目录 /usr/local/<appid>/init.d/ 下，systemd 不会扫描那里，
+# 需要在 /etc/systemd/system 里注册一份。
+#
+# ⚠️ 必须是**实体文件**，不能是软链：应用目录在数据卷 /Volume1 上，开机早期卷还没挂载，
+# systemd 解析软链会拿到 ENOENT（journal 里是 “Failed to open ... No such file or directory”），
+# 于是直接跳过这个单元，表现为「重启后应用不自启」。
+if [ -f "${UNIT_SRC}" ]; then
+    rm -f "${UNIT_DST}"
+    install -m 644 "${UNIT_SRC}" "${UNIT_DST}"
+fi
 
 case "$1" in
     configure)
@@ -64,6 +71,9 @@ case "$1" in
             chown -R "${APPID}:allusers" "${APP}/data" "${APP}/logs" 2>/dev/null || true
         fi
         systemctl daemon-reload 2>/dev/null || true
+        # 旧版本留下的是指向 /usr/local 的 wants 软链，先摘掉再 enable，
+        # 让 systemctl 按新的实体文件重新建立多用户目标下的注册。
+        rm -f "/etc/systemd/system/multi-user.target.wants/${APPID}.service"
         systemctl enable "${APPID}.service" 2>/dev/null || true
         # 升级后必须重启才用上新代码；全新安装时 restart 等价于 start
         systemctl restart "${APPID}.service" 2>/dev/null || true
