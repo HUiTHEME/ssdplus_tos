@@ -1,0 +1,48 @@
+#!/bin/sh
+# SSD助手 —— 启动器
+#
+# systemd 以应用用户（非 root）执行本脚本，脚本只负责定位 Python 解释器并把
+# 固定参数交给后端。所有参数都写死在这里，unit 文件保持简单，也不会因为
+# 外部环境变量拼错而把服务起成别的形态。
+set -eu
+
+APP=/usr/local/ssdplus
+DATA="${SSDPLUS_DATA:-$APP/data}"
+SOCKET=/var/api/ssdplus.sock
+
+if [ ! -f "$APP/server/main.py" ]; then
+    echo "SSD助手: 缺少后端程序 $APP/server/main.py" >&2
+    exit 1
+fi
+
+# 前端页面：平台会把 webui.bz2 解压成 webui/；手工安装没解压时退回 www/
+if [ -f "$APP/webui/index.html" ]; then
+    WWW="$APP/webui"
+else
+    WWW="$APP/www"
+fi
+
+PY=""
+for candidate in "${SSDPLUS_PYTHON:-}" /usr/bin/python3 /usr/local/bin/python3; do
+    if [ -n "$candidate" ] && [ -x "$candidate" ]; then
+        PY="$candidate"
+        break
+    fi
+done
+if [ -z "$PY" ]; then
+    echo "SSD助手: 未找到 python3，请确认系统已安装 python3" >&2
+    exit 1
+fi
+
+mkdir -p "$DATA" "$DATA/etc" "$APP/logs" /var/api
+
+# 只监听 Unix Socket，不占 TCP 端口。
+# --prefix 写 /ssdplus：平台网关正常会把 /v2/proxy/ssdplus 剥掉再转发，
+# 这时路径是 /api/xxx，前缀不匹配就原样使用；万一某个固件把 /ssdplus/api/xxx
+# 整段透传进来，前缀也能把它剥干净。两种形态都能对上。
+exec "$PY" "$APP/server/main.py" \
+    --socket "$SOCKET" \
+    --prefix "/ssdplus" \
+    --www "$WWW" \
+    --data "$DATA" \
+    --etc "$DATA/etc"

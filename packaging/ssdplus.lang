@@ -1,0 +1,155 @@
+[zh-cn]
+name = "SSD助手"
+auth = "疯狂的大叔"
+descript = "为全闪（NVMe）NAS 打造的固态硬盘管理助手：自动采集每块 SSD 的读写总量、实时速率、温度与健康度，解析 SMART 中的寿命消耗、通电时长、异常断电、介质错误等关键指标，并以日历热力图呈现长期使用趋势，帮助你及时发现异常、评估剩余寿命，在硬盘真正损坏之前做好准备。"
+important = "阅读 SMART 需要访问硬盘设备，应用以受控能力运行，不使用 root 身份。"
+
+[zh-hk]
+name = "SSD助手"
+auth = "瘋狂的大叔"
+descript = "為全快閃（NVMe）NAS 打造的固態硬碟管理助手：自動採集每塊 SSD 的讀寫總量、即時速率、溫度與健康度，解析 SMART 中的壽命消耗、通電時長、異常斷電、媒體錯誤等關鍵指標，並以日曆熱力圖呈現長期使用趨勢，協助你及早發現異常、評估剩餘壽命，在硬碟真正損壞之前做好準備。"
+important = "讀取 SMART 需要存取硬碟裝置，應用以受控能力執行，不使用 root 身分。"
+
+[en-us]
+name = "SSD Assistant"
+auth = "HUiTHEME"
+descript = "A drive health console built for all-flash (NVMe) NAS systems. It collects total reads and writes, live throughput, temperature and health for every SSD, decodes SMART attributes such as wear level, power-on hours, unexpected power loss and media errors, and charts long-term trends as a calendar heatmap, so you can spot problems early, estimate remaining life and replace a drive before it fails."
+important = "Reading SMART requires access to the drive device. The app runs with narrowly scoped capabilities and never as root."
+
+[ko-kr]
+name = "SSD 어시스턴트"
+auth = "HUiTHEME"
+descript = "올플래시(NVMe) NAS를 위한 SSD 관리 도구입니다. 모든 SSD의 총 읽기/쓰기량, 실시간 속도, 온도와 건강 상태를 수집하고 SMART의 수명 소모, 사용 시간, 예기치 않은 전원 차단, 미디어 오류를 해석하여 달력 히트맵으로 장기 추세를 보여 줍니다."
+important = "SMART 읽기에는 드라이브 장치 접근이 필요합니다. 앱은 최소 권한으로 실행되며 root로 실행되지 않습니다."
+
+[ja-jp]
+name = "SSDアシスタント"
+auth = "HUiTHEME"
+descript = "オールフラッシュ（NVMe）NAS 向けの SSD 管理ツールです。各 SSD の総読み書き量、リアルタイム速度、温度、健康度を収集し、SMART の寿命消費、通電時間、異常電源断、媒体エラーを解析して、カレンダーヒートマップで長期傾向を表示します。"
+important = "SMART の読み取りにはドライブデバイスへのアクセスが必要です。アプリは最小限の権限で動作し、root では実行されません。"
+
+[de-de]
+name = "SSD-Assistent"
+auth = "HUiTHEME"
+descript = "Eine Laufwerkskonsole für All-Flash-NAS (NVMe). Sie erfasst gelesene und geschriebene Datenmengen, aktuelle Transferraten, Temperatur und Zustand jeder SSD, liest SMART-Werte wie Abnutzung, Betriebsstunden, unerwartete Stromausfälle und Medienfehler aus und zeigt langfristige Trends als Kalender-Heatmap."
+important = "Das Auslesen von SMART erfordert Zugriff auf das Laufwerk. Die App läuft mit eng begrenzten Rechten und niemals als root."
+
+[fr-fr]
+name = "Assistant SSD"
+auth = "HUiTHEME"
+descript = "Une console de surveillance pour NAS tout-flash (NVMe). Elle relève les volumes lus et écrits, le débit en temps réel, la température et l'état de chaque SSD, décode les attributs SMART (usure, heures de fonctionnement, coupures inattendues, erreurs média) et affiche les tendances sous forme de carte de chaleur calendaire."
+important = "La lecture du SMART nécessite l'accès au disque. L'application s'exécute avec des privilèges strictement limités, jamais en root."
+
+[it-it]
+name = "Assistente SSD"
+auth = "HUiTHEME"
+descript = "Una console di monitoraggio per NAS all-flash (NVMe). Raccoglie dati letti e scritti, velocita in tempo reale, temperatura e stato di ogni SSD, interpreta gli attributi SMART (usura, ore di accensione, interruzioni di corrente, errori del supporto) e mostra le tendenze a lungo termine come mappa di calore."
+important = "La lettura SMART richiede l'accesso al disco. L'app viene eseguita con privilegi limitati e mai come root."
+
+[es-es]
+name = "Asistente SSD"
+auth = "HUiTHEME"
+descript = "Una consola de vigilancia para NAS totalmente flash (NVMe). Recopila datos leidos y escritos, velocidad en tiempo real, temperatura y salud de cada SSD, interpreta los atributos SMART (desgaste, horas de encendido, cortes de corriente, errores de medio) y muestra tendencias a largo plazo como mapa de calor."
+important = "Leer SMART requiere acceso al dispositivo. La aplicacion se ejecuta con privilegios muy limitados y nunca como root."
+
+[hu-hu]
+name = "SSD Asszisztens"
+auth = "HUiTHEME"
+descript = "Lemezfelugyelo minden flash-es (NVMe) NAS-hoz. Osszegyujti az olvasott es irt adatmennyiseget, az aktualis sebesseget, a homersekletet es az allapotot, ertelmezi a SMART ertekeket (kopas, bekapcsolt orak, varatlan aramszunes, mediumhibak), es naptar-hoter kep formajaban mutatja a hosszu tavu trendeket."
+important = "A SMART olvasasahoz hozzaferes kell a lemezhez. Az alkalmazas szuksegu jogosultsagokkal fut, soha nem rootkent."
+
+[pl-pl]
+name = "Asystent SSD"
+auth = "HUiTHEME"
+descript = "Konsola monitorujaca dyski w NAS all-flash (NVMe). Zbiera ilosc odczytanych i zapisanych danych, biezaca predkosc, temperature i stan kazdego SSD, interpretuje atrybuty SMART (zuzycie, godziny pracy, nieoczekiwane zaniki zasilania, bledy nosnika) i pokazuje trendy jako mape ciepla kalendarza."
+important = "Odczyt SMART wymaga dostepu do urzadzenia. Aplikacja dziala z ograniczonymi uprawnieniami i nigdy jako root."
+
+[tr-tr]
+name = "SSD Yardimcisi"
+auth = "HUiTHEME"
+descript = "Tum flash (NVMe) NAS sistemleri icin disk izleme konsolu. Her SSD icin okunan ve yazilan toplam veriyi, anlik hizi, sicakligi ve sagligi toplar; SMART degerlerini (asindirma, calisma saati, beklenmeyen elektrik kesintisi, ortam hatalari) yorumlar ve uzun vadeli egilimleri takvim isi haritasi olarak gosterir."
+important = "SMART okumak disk aygitina erisim gerektirir. Uygulama sinirli yetkilerle ve asla root olarak calismaz."
+
+[ru-ru]
+name = "Помощник SSD"
+auth = "HUiTHEME"
+descript = "Консоль контроля дисков для полностью флешовых NAS (NVMe). Собирает объём чтения и записи, текущую скорость, температуру и состояние каждого SSD, разбирает атрибуты SMART (износ, часы работы, внезапные отключения питания, ошибки носителя) и показывает долгосрочные тренды в виде календарной тепловой карты."
+important = "Чтение SMART требует доступа к устройству. Приложение работает с ограниченными возможностями и никогда не запускается от root."
+
+[pt-pt]
+name = "Assistente SSD"
+auth = "HUiTHEME"
+descript = "Uma consola de monitorizacao para NAS totalmente flash (NVMe). Recolhe dados lidos e escritos, velocidade em tempo real, temperatura e saude de cada SSD, interpreta os atributos SMART (desgaste, horas de funcionamento, cortes de energia, erros de suporte) e apresenta tendencias como mapa de calor de calendario."
+important = "Ler o SMART exige acesso ao dispositivo. A aplicacao corre com privilegios limitados e nunca como root."
+
+[cs-cz]
+name = "SSD Assistant"
+auth = "HUiTHEME"
+descript = "A drive health console built for all-flash (NVMe) NAS systems. It collects total reads and writes, live throughput, temperature and health for every SSD, decodes SMART attributes such as wear level, power-on hours, unexpected power loss and media errors, and charts long-term trends as a calendar heatmap."
+important = "Reading SMART requires access to the drive device. The app runs with narrowly scoped capabilities and never as root."
+
+[da-dk]
+name = "SSD Assistant"
+auth = "HUiTHEME"
+descript = "A drive health console built for all-flash (NVMe) NAS systems. It collects total reads and writes, live throughput, temperature and health for every SSD, decodes SMART attributes such as wear level, power-on hours, unexpected power loss and media errors, and charts long-term trends as a calendar heatmap."
+important = "Reading SMART requires access to the drive device. The app runs with narrowly scoped capabilities and never as root."
+
+[nl-nl]
+name = "SSD-assistent"
+auth = "HUiTHEME"
+descript = "Een schijfbewaking voor volledig flash (NVMe) NAS-systemen. Verzamelt gelezen en geschreven hoeveelheden, actuele snelheid, temperatuur en gezondheid van elke SSD, leest SMART-waarden zoals slijtage, bedrijfsuren, onverwachte stroomuitval en mediafouten uit en toont langetermijntrends als kalenderheatmap."
+important = "SMART uitlezen vereist toegang tot het schijfapparaat. De app draait met beperkte rechten en nooit als root."
+
+[nb-no]
+name = "SSD Assistant"
+auth = "HUiTHEME"
+descript = "A drive health console built for all-flash (NVMe) NAS systems. It collects total reads and writes, live throughput, temperature and health for every SSD, decodes SMART attributes such as wear level, power-on hours, unexpected power loss and media errors, and charts long-term trends as a calendar heatmap."
+important = "Reading SMART requires access to the drive device. The app runs with narrowly scoped capabilities and never as root."
+
+[sv-se]
+name = "SSD-assistent"
+auth = "HUiTHEME"
+descript = "En diskovervakning for NAS med enbart flash (NVMe). Samlar lastade och skrivna datamangder, aktuell hastighet, temperatur och halsa for varje SSD, tolkar SMART-varden som slitning, driftstimmar, ovantade stromavbrott och mediasfel och visar langsiktiga trender som en kalenderheatmap."
+important = "Att lasa SMART kravs atkomst till disken. Appen kors med begransade rattigheter och aldrig som root."
+
+[el-gr]
+name = "SSD Assistant"
+auth = "HUiTHEME"
+descript = "A drive health console built for all-flash (NVMe) NAS systems. It collects total reads and writes, live throughput, temperature and health for every SSD, decodes SMART attributes such as wear level, power-on hours, unexpected power loss and media errors, and charts long-term trends as a calendar heatmap."
+important = "Reading SMART requires access to the drive device. The app runs with narrowly scoped capabilities and never as root."
+
+[ro-ro]
+name = "SSD Assistant"
+auth = "HUiTHEME"
+descript = "A drive health console built for all-flash (NVMe) NAS systems. It collects total reads and writes, live throughput, temperature and health for every SSD, decodes SMART attributes such as wear level, power-on hours, unexpected power loss and media errors, and charts long-term trends as a calendar heatmap."
+important = "Reading SMART requires access to the drive device. The app runs with narrowly scoped capabilities and never as root."
+
+[th-th]
+name = "SSD Assistant"
+auth = "HUiTHEME"
+descript = "A drive health console built for all-flash (NVMe) NAS systems. It collects total reads and writes, live throughput, temperature and health for every SSD, decodes SMART attributes such as wear level, power-on hours, unexpected power loss and media errors, and charts long-term trends as a calendar heatmap."
+important = "Reading SMART requires access to the drive device. The app runs with narrowly scoped capabilities and never as root."
+
+[vi-vn]
+name = "SSD Assistant"
+auth = "HUiTHEME"
+descript = "A drive health console built for all-flash (NVMe) NAS systems. It collects total reads and writes, live throughput, temperature and health for every SSD, decodes SMART attributes such as wear level, power-on hours, unexpected power loss and media errors, and charts long-term trends as a calendar heatmap."
+important = "Reading SMART requires access to the drive device. The app runs with narrowly scoped capabilities and never as root."
+
+[id-id]
+name = "SSD Assistant"
+auth = "HUiTHEME"
+descript = "A drive health console built for all-flash (NVMe) NAS systems. It collects total reads and writes, live throughput, temperature and health for every SSD, decodes SMART attributes such as wear level, power-on hours, unexpected power loss and media errors, and charts long-term trends as a calendar heatmap."
+important = "Reading SMART requires access to the drive device. The app runs with narrowly scoped capabilities and never as root."
+
+[ar-sa]
+name = "SSD Assistant"
+auth = "HUiTHEME"
+descript = "A drive health console built for all-flash (NVMe) NAS systems. It collects total reads and writes, live throughput, temperature and health for every SSD, decodes SMART attributes such as wear level, power-on hours, unexpected power loss and media errors, and charts long-term trends as a calendar heatmap."
+important = "Reading SMART requires access to the drive device. The app runs with narrowly scoped capabilities and never as root."
+
+[he-il]
+name = "SSD Assistant"
+auth = "HUiTHEME"
+descript = "A drive health console built for all-flash (NVMe) NAS systems. It collects total reads and writes, live throughput, temperature and health for every SSD, decodes SMART attributes such as wear level, power-on hours, unexpected power loss and media errors, and charts long-term trends as a calendar heatmap."
+important = "Reading SMART requires access to the drive device. The app runs with narrowly scoped capabilities and never as root."

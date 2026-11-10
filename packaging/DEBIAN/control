@@ -1,0 +1,13 @@
+Package: ssdplus
+Version: 1.0.0
+Architecture: amd64
+Section: utils
+Priority: optional
+Maintainer: 疯狂的大叔 <HUiTHEME@users.noreply.github.com>
+Depends: libc6 (>= 2.34), systemd, python3 (>= 3.8), smartmontools
+Description: SSD Assistant - SSD health and lifespan monitor
+ Reads total reads and writes, live throughput, temperature and health for
+ every SSD, decodes SMART attributes such as wear level, power-on hours,
+ unexpected power loss and media errors, and charts long-term trends as a
+ calendar heatmap. Runs as a dedicated non-root user and only listens on a
+ Unix socket behind the TOS API gateway.

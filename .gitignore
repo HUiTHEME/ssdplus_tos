@@ -1,0 +1,11 @@
+# 构建产物
+dist/
+preview/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# 系统杂项
+.DS_Store
+Thumbs.db

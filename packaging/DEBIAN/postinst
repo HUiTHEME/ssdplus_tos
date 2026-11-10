@@ -1,0 +1,73 @@
+#!/bin/bash
+# SSD助手 —— 安装后（以及每次升级后）执行
+#
+# $1 = configure（安装/升级都会是这个）
+# $2 = 升级前的版本号，全新安装时为空
+set -e
+
+APPID="ssdplus"
+APP="/usr/local/${APPID}"
+UNIT_SRC="${APP}/init.d/${APPID}.service"
+UNIT_DST="/etc/systemd/system/${APPID}.service"
+
+# TOS 的 App Center 安装时会按 config.ini 的 user 字段自动建用户，
+# 但手工 dpkg -i 安装时不会 —— 这里做一次幂等兜底，两边都能跑。
+# 主组跟随 TOS 的约定用 allusers。
+if ! id "${APPID}" >/dev/null 2>&1; then
+    if getent group allusers >/dev/null 2>&1; then
+        useradd -r -s /usr/sbin/nologin -d "${APP}" -g allusers "${APPID}" 2>/dev/null || true
+    else
+        useradd -r -s /usr/sbin/nologin -d "${APP}" "${APPID}" 2>/dev/null || true
+    fi
+fi
+
+# 运行期目录：数据与日志。它们不在 deb 的文件清单里，所以升级、卸载再重装
+# 都不会被 dpkg 删掉，用户的采样历史一直在 data 里。
+mkdir -p "${APP}/data" "${APP}/data/etc" "${APP}/logs" /var/api
+
+# 读盘相关：TOS 的设备节点是 root:disk 0660，把应用用户加进 disk 组，
+# 这样 os.access(/dev/sdX, R_OK) 这类可见性判断也能通过（capability 只能
+# 让 open() 成功，骗不过 access(2)）。
+if getent group disk >/dev/null 2>&1; then
+    usermod -aG disk "${APPID}" 2>/dev/null || true
+fi
+
+if getent group allusers >/dev/null 2>&1; then
+    chown -R "${APPID}:allusers" "${APP}/data" "${APP}/logs" 2>/dev/null || true
+else
+    chown -R "${APPID}" "${APP}/data" "${APP}/logs" 2>/dev/null || true
+fi
+chmod 750 "${APP}/data" "${APP}/logs" 2>/dev/null || true
+
+# 前端页面：App Center 安装时平台会解压 webui.bz2，手工安装不会，这里补一次。
+# 解压出来是 webui/ 目录（内部含 index.html），与平台 nginx 的站点根保持一致。
+if [ -f "${APP}/webui.bz2" ]; then
+    tar -xjf "${APP}/webui.bz2" -C "${APP}" 2>/dev/null || true
+    chmod -R a+rX "${APP}/webui" 2>/dev/null || true
+fi
+
+# 平台会建 /usr/www/<appid> 指向 webui，手工安装时补一条软链，
+# 这样即便不经 App Center 也能直接用 8181 端口打开页面。
+if [ -d /usr/www ] && [ -d "${APP}/webui" ] && [ ! -e "/usr/www/${APPID}" ]; then
+    ln -sfn "${APP}/webui" "/usr/www/${APPID}" 2>/dev/null || true
+fi
+
+# TOS 要求 unit 文件放在应用目录 /usr/local/<appid>/init.d/ 下，
+# 但 systemd 不会自己扫描那里，需要一条指向 /etc/systemd/system 的链接。
+ln -sf "${UNIT_SRC}" "${UNIT_DST}"
+
+case "$1" in
+    configure)
+        if [ -n "$2" ]; then
+            echo "ssdplus: upgrading from ${2}"
+            # 升级不动数据，只校正一次归属
+            chown -R "${APPID}:allusers" "${APP}/data" "${APP}/logs" 2>/dev/null || true
+        fi
+        systemctl daemon-reload 2>/dev/null || true
+        systemctl enable "${APPID}.service" 2>/dev/null || true
+        # 升级后必须重启才用上新代码；全新安装时 restart 等价于 start
+        systemctl restart "${APPID}.service" 2>/dev/null || true
+        ;;
+esac
+
+exit 0

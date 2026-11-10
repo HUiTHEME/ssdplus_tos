@@ -1,0 +1,54 @@
+[Unit]
+Description=SSD Assistant - SSD health, SMART and lifespan monitor
+Documentation=https://github.com/HUiTHEME/ssdplus_tos
+After=network.target
+# 崩溃循环保护：60 秒内最多拉起 5 次，超了 systemd 会停下并标记失败。
+# （Restart= / RestartSec= 按平台规范不在这里配置，重启策略由 TOS 管理。）
+StartLimitBurst=5
+StartLimitIntervalSec=60
+
+[Service]
+Type=simple
+User=ssdplus
+# Group 显式写 allusers：TOS 建应用用户时主组就是 allusers，不存在同名的
+# ssdplus 组，写 Group=ssdplus 会让 systemd 在 ExecStart 之前就以 216/GROUP 失败。
+Group=allusers
+WorkingDirectory=/usr/local/ssdplus
+EnvironmentFile=-/usr/local/ssdplus/ssdplus.env
+# 只监听 /var/api/ssdplus.sock，不占用任何 TCP 端口，全部流量走平台代理。
+ExecStart=/usr/local/ssdplus/bin/ssdplus
+# /var/api 是 1777 共享目录，socket 可能被别的用户残留文件占住导致 rm EPERM；
+# 前面加 "-" 让一次正常停机不会被记成「停用失败」。
+ExecStopPost=-/bin/rm -f /var/api/ssdplus.sock
+TimeoutStartSec=30
+TimeoutStopSec=10
+KillMode=control-group
+KillSignal=SIGTERM
+SendSIGKILL=yes
+
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+LockPersonality=true
+# 不能用 PrivateDevices：读 SMART 要打开 /dev/nvme0n1、/dev/sdX；
+# 也不能用 PrivateTmp：TOS 的 /var/api 是指向 /tmp/api 的软链接。
+# 读盘只需要三样能力，进程本身仍是非 root 用户：
+#   CAP_DAC_READ_SEARCH 打开 root 属主的设备节点
+#   CAP_SYS_ADMIN       NVMe/SCSI 的 ioctl 透传
+#   CAP_SYS_RAWIO       SATA 的 ATA passthrough
+AmbientCapabilities=CAP_DAC_READ_SEARCH CAP_SYS_ADMIN CAP_SYS_RAWIO
+CapabilityBoundingSet=CAP_DAC_READ_SEARCH CAP_SYS_ADMIN CAP_SYS_RAWIO
+# ProtectSystem=strict 下 /usr/local 只读，数据、日志与 socket 目录必须显式放开
+ReadWritePaths=/usr/local/ssdplus/data /usr/local/ssdplus/logs /var/api
+LimitNOFILE=65536
+LimitNPROC=512
+MemoryMax=512M
+CPUQuota=100%
+
+[Install]
+WantedBy=multi-user.target

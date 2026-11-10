@@ -1,0 +1,29 @@
+<!doctype html>
+<!-- 模拟 TOS 桌面窗口：40px 标题栏是**浮在** iframe 之上画的，
+     iframe 仍从 top:0 开始 —— 和平台真实行为一致，
+     用来检查应用自己的顶栏有没有被压到标题栏底下。 -->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; height: 100%; background: #eef1f5;
+               font: 13px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
+  .win { position: absolute; inset: 0; overflow: hidden; border-radius: 10px;
+         background: #fff; box-shadow: 0 8px 30px rgba(0, 0, 0, .18); }
+  iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+           border: 0; display: block; }
+  .bar { position: absolute; top: 0; left: 0; right: 0; height: 40px; box-sizing: border-box;
+         background: #f7f8fa; border-bottom: 1px solid #e5e8ec;
+         display: flex; align-items: center; justify-content: space-between;
+         padding: 0 14px; color: #4b5563; }
+  .bar b { font-weight: 600; color: #1f2329; }
+  .dots { letter-spacing: 8px; color: #8a9099; }
+</style>
+</head>
+<body>
+  <div class="win">
+    <iframe src="/ssdplus/"></iframe>
+    <div class="bar"><b>SSD助手</b><span class="dots">— □ ✕</span></div>
+  </div>
+</body>
+</html>
