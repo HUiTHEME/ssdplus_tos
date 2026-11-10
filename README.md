@@ -171,7 +171,9 @@ TOSAppSelfTestingTool_amd64 -c dist/ssdplus_x86_64.deb   # -> check passed
 
 安装包通过 GitHub Release 发布，平台从 Release 拉取，不接受其他传包方式：
 
-- Tag 形如 `v1.0.0`，同一个 Release 里放两个架构的包，**不放其他格式**
+- Tag 形如 `v1.0.1`，同一个 Release 里放两个架构的包，**不放其他格式**
+- **发新版要新建 Release，不要替换旧 Release 的资产**：平台在提交版本时会对包做 sha256
+  基线，审核时重新下载比对，替换同一 tag 下的文件会让已提交的版本校验失败
 - 资产命名：`ssdplus_x86_64.deb`、`ssdplus_aarch64.deb`（版本号从包内 `config.ini` 读，
   文件名里不需要带）
 - 架构分开提交：开发者平台上 `x86_64` 与 `aarch64` 分别创建应用、分别选包
