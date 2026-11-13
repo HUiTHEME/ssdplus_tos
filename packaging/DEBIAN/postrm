@@ -1,34 +1,111 @@
 #!/bin/bash
 # SSD助手 —— 卸载后执行
 #
-# ⚠️ 关于用户数据：
-# TOS 的「卸载重装 / 修复安装」会走 dpkg --purge 路径（dpkg.log 里表现为
-# `configure ssdplus <ver> <none>`，即把它当成一次全新安装）。所以这里
-# **绝对不能删 data 目录**，否则用户从应用中心重装一次，全部采样历史就没了。
+# $1 = remove | purge | upgrade | failed-upgrade | abort-install | abort-upgrade | disappear
 #
-# 清空数据只能由用户自己在应用里「应用设置 → 清除历史数据」来做，
-# 那是带二次确认的操作，不留这种"顺手删库"的口子。
+# 审核项 F4 / F11 要求：卸载后不残留安装目录、服务文件、配置与用户数据。
+# 平台文档也把「卸载」定义为 `dpkg --purge <appid>`，应用中心卸载走同一条路径。
+# 所以 remove 与 purge 都做完整清理，只有升级（upgrade）不动用户数据。
 set -e
 
 APPID="ssdplus"
 APP="/usr/local/${APPID}"
-UNIT_DST="/etc/systemd/system/${APPID}.service"
+UNIT_ETC="/etc/systemd/system/${APPID}.service"
+UNIT_LIB="/usr/lib/systemd/system/${APPID}.service"
+SOCK="/var/api/${APPID}.sock"
 
-# 先摘掉 systemd 的注册，否则以后同名的旧 unit 会一直挂在列表里
-rm -f "${UNIT_DST}"
+# TOS 上 /usr/local/<id> 只是平台建的软链，实体在 /Volume<N>/@apps/<id>。
+# dpkg 在删除文件阶段就会把这条软链当目录项删掉，等到 postrm 执行时 APP 往往
+# 已经不存在——此时仍要能定位实体目录，否则 data/ 与 logs/ 会留在卷上删不掉。
+resolve_real_app() {
+    REAL_APP=""
+    if [ -d "${APP}" ]; then
+        REAL_APP="$(readlink -f "${APP}" 2>/dev/null || echo "${APP}")"
+        return 0
+    fi
+    for cand in /Volume*/@apps/"${APPID}"; do
+        if [ -d "${cand}" ]; then
+            REAL_APP="${cand}"
+            return 0
+        fi
+    done
+    return 0
+}
 
-# 只清应用自己生成、可重建的运行时产物：
-#   webui/   每次装/升级都会从 webui.bz2 重新解压
-#   socket   进程退出后残留的
-#   /usr/www 平台用于发静态页的软链
-rm -rf "${APP}/webui"
-rm -f /var/api/"${APPID}".sock
-if [ -L "/usr/www/${APPID}" ]; then
-    rm -f "/usr/www/${APPID}"
-fi
+remove_unit() {
+    # /etc/systemd/system 下是本包安装的实体单元；App Center 还会另外在
+    # /usr/lib/systemd/system 建一条指向应用目录的软链，两处都要摘掉，
+    # 否则以后同名的旧 unit 一直挂在 systemctl 列表里。
+    rm -f "${UNIT_ETC}"
+    rm -f /etc/systemd/system/*.wants/"${APPID}.service" 2>/dev/null || true
+    if [ -L "${UNIT_LIB}" ]; then
+        rm -f "${UNIT_LIB}"
+    fi
+    systemctl daemon-reload 2>/dev/null || true
+    systemctl reset-failed "${APPID}.service" 2>/dev/null || true
+}
 
-# 即使收到 purge 也不删用户数据与用户账号：
-# 账号删了下次安装会换 UID，data 目录的属主就对不上，等于换个方式把数据锁死。
+remove_runtime_files() {
+    # 进程退出后残留的 socket
+    rm -f "${SOCK}"
+    # 平台用于发静态页的软链
+    if [ -L "/usr/www/${APPID}" ]; then
+        rm -f "/usr/www/${APPID}"
+    fi
+}
+
+remove_user_data() {
+    # 配置、历史数据、日志与前端解压产物全部删除，不留残余。
+    # 只对名字完全等于 APPID 的目录动手，避免路径异常时误删别的目录。
+    resolve_real_app
+    case "${REAL_APP}" in
+        */@apps/"${APPID}"|/usr/local/"${APPID}")
+            rm -rf "${REAL_APP}/data" "${REAL_APP}/logs" "${REAL_APP}/webui"
+            find "${REAL_APP}" -maxdepth 4 -type d -name __pycache__ -prune -exec rm -rf {} + 2>/dev/null || true
+            # 目录空了就连同类目录一起收掉。
+            # 若只剩平台自己的记账文件（install_data.json / ROUTER / .userid），
+            # 说明应用的东西已经清干净，一并去掉；有其它未知内容则原样保留，不冒险。
+            if ! rmdir "${REAL_APP}" 2>/dev/null; then
+                leftover="$(ls -A "${REAL_APP}" 2>/dev/null \
+                    | grep -vE '^(install_data\.json|ROUTER|\.userid|\._.*)$' | head -n 1 || true)"
+                if [ -z "${leftover}" ]; then
+                    rm -f "${REAL_APP}/install_data.json" "${REAL_APP}/ROUTER" "${REAL_APP}/.userid"
+                    rm -f "${REAL_APP}"/._* 2>/dev/null || true
+                    rmdir "${REAL_APP}" 2>/dev/null || true
+                fi
+            fi
+            ;;
+    esac
+    # dpkg 已把 /usr/local/<id> 删掉时这里不会命中；若它还在（如手工删包）顺手清理
+    if [ -L "${APP}" ] && [ ! -e "${APP}" ]; then
+        rm -f "${APP}"
+    fi
+}
+
+case "${1:-}" in
+    remove|purge)
+        remove_unit
+        remove_runtime_files
+        remove_user_data
+        # purge 时连应用账号一起删除；remove 保留账号，方便同一会话里立刻重装
+        # 复用同一 UID，避免数据目录属主对不上。
+        if [ "$1" = "purge" ]; then
+            if id "${APPID}" >/dev/null 2>&1; then
+                userdel "${APPID}" 2>/dev/null || true
+            fi
+        fi
+        ;;
+    upgrade|failed-upgrade|abort-install|abort-upgrade)
+        # 升级/回滚：保留 data 与 logs，只清可重建的残留。
+        # 这里绝不能删数据，否则每次更新都会清空用户的采样历史。
+        rm -f "${SOCK}"
+        ;;
+    disappear)
+        # 包文件已被外部删除，尽力收尾
+        remove_unit
+        ;;
+esac
+
 systemctl daemon-reload 2>/dev/null || true
 
 exit 0

@@ -67,6 +67,32 @@ build_one() {
   chmod 644 "$app/config.ini" "$app/$APPID.lang" "$app/$APPID.env" \
             "$app/images/icons/$APPID.svg" "$app/init.d/$SYSTEM_ID.service"
 
+  # --- 许可与隐私（平台审核要求包内自带，且能直接打开）---
+  # LICENSE / PRIVACY.md / THIRD-PARTY-NOTICES.md 同时放两处：
+  #   · /usr/local/<appid>/     应用目录，用户和审核人员能直接看
+  #   · /usr/share/doc/<appid>/ Debian 约定的文档位置（copyright 按规范归档）
+  cp "$HERE/LICENSE"                  "$app/LICENSE"
+  cp "$HERE/PRIVACY.md"               "$app/PRIVACY.md"
+  cp "$HERE/THIRD-PARTY-NOTICES.md"   "$app/THIRD-PARTY-NOTICES.md"
+  chmod 644 "$app/LICENSE" "$app/PRIVACY.md" "$app/THIRD-PARTY-NOTICES.md"
+
+  local doc="$STAGE/usr/share/doc/$APPID"
+  mkdir -p "$doc"
+  # TOS 的 dpkg 配了 path-exclude=/usr/share/doc/*，只放行 copyright，
+  # 所以这里只放 copyright；可读的许可与隐私原文放在 /usr/local/ssdplus/ 下。
+  { echo "Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/"; \
+    echo; echo "Upstream-Name: ssdplus"; \
+    echo "Source: https://github.com/HUiTHEME/ssdplus_tos"; \
+    echo; echo "Files: *"; \
+    echo "Copyright: 2026 疯狂的大叔 (HUiTHEME)"; \
+    echo "License: MIT"; \
+    echo; sed -e 's/^/ /' -e 's/^ \.$/ ./' "$HERE/LICENSE"; \
+    echo; echo "Files: debian/*"; \
+    echo "Copyright: 2026 疯狂的大叔 (HUiTHEME)"; \
+    echo "License: MIT"; \
+  } > "$doc/copyright"
+  chmod 644 "$doc/copyright"
+
   # config.ini 的 platform 必须与这个包的实际架构一致：平台提交时会拿它和
   # 开发者平台上登记的架构比对，不匹配直接驳回，且不接受 all / 多值。
   python3 - "$app/config.ini" "$platform" "$VERSION" <<'PYV'
@@ -143,6 +169,12 @@ PY
     cp "$PKG/DEBIAN/$f" "$STAGE/DEBIAN/$f"
     chmod 755 "$STAGE/DEBIAN/$f"
   done
+
+  # 整个打包树再扫一遍 macOS 垃圾文件：AppleDouble（._xxx）会被平台当成真实文件
+  # 装进应用目录，审核时算"多余文件"，也难看。
+  find "$STAGE" \( -name "._*" -o -name ".DS_Store" -o -name "Thumbs.db" \) -delete 2>/dev/null || true
+  find "$STAGE" -name "__pycache__" -type d -prune -exec rm -rf {} + 2>/dev/null || true
+  find "$STAGE" -name "*.pyc" -delete 2>/dev/null || true
 
   # 行尾统一 LF：脚本/配置里混进 CRLF 会让 TOS 报 bad interpreter
   python3 - "$STAGE" <<'PY'

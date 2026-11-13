@@ -2,6 +2,10 @@
 (function () {
   "use strict";
 
+  /* 合规文档的公开地址：审核要求隐私政策能从应用内点开，且指向可公开访问的页面 */
+  var REPO_URL = "https://github.com/HUiTHEME/ssdplus_tos";
+  var PRIVACY_URL = REPO_URL + "/blob/main/PRIVACY.md";
+
   var API = "";
   var state = {
     page: "overview",
@@ -1357,6 +1361,20 @@
         '<input type="file" id="file-import" accept=".json,application/json" hidden>' +
         '</div>' +
         '<div class="snap-list">' + snapRows + '</div>' +
+        '</section>' +
+
+        // 版本与合规入口：隐私政策、开源许可、项目主页、反馈。
+        // 审核要求隐私政策能从应用内直接打开，所以这里给的是固定链接，
+        // 不依赖后端接口，页面加载完就能点。
+        '<section class="card settings-card about-foot">' +
+        '<span class="about-name">SSD助手 <b>v' + esc(info.version || "") + '</b></span>' +
+        '<span class="about-links">' +
+        '<a href="' + PRIVACY_URL + '" target="_blank" rel="noreferrer">隐私政策</a>' +
+        '<a href="' + REPO_URL + '/blob/main/LICENSE" target="_blank" rel="noreferrer">开源许可（MIT）</a>' +
+        '<a href="' + REPO_URL + '/blob/main/THIRD-PARTY-NOTICES.md" target="_blank" rel="noreferrer">第三方声明</a>' +
+        '<a href="' + REPO_URL + '" target="_blank" rel="noreferrer">项目主页</a>' +
+        '<a href="' + REPO_URL + '/issues" target="_blank" rel="noreferrer">反馈</a>' +
+        '</span>' +
         '</section>' +
 
         '';

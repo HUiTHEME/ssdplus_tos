@@ -42,10 +42,14 @@
 ```bash
 sudo dpkg -i ssdplus_x86_64.deb
 systemctl status ssdplus
-sudo dpkg --purge ssdplus      # 卸载不会删 data/
+sudo dpkg --purge ssdplus      # 卸载，连同 data/ 一起清空
 ```
 
 安装后页面在 `/<appid>/`，接口由平台网关从 `/v2/proxy/ssdplus/` 转到 `/var/api/ssdplus.sock`。
+
+**卸载会连数据一起删除**（审核要求卸载不留残余），且不可恢复。需要留历史就先用
+「历史数据 → 导出」或「立即备份」把文件取走；只想清空数据不想卸载，用设置页的
+「清空历史数据」。升级（`dpkg -i` 覆盖安装）不受影响，数据原样保留。
 
 ## 目录结构
 
@@ -80,8 +84,9 @@ webui.bz2               前端压缩包，安装时解压成 webui/
 webui/                  平台 nginx 的站点根（/usr/www/ssdplus -> 这里）
 images/icons/ssdplus.svg
 init.d/ssdplus.service
-data/                   运行期数据（不在包内，升级重装都不会删）
+data/                   运行期数据（不在包内，升级保留、卸载删除）
 logs/                   日志目录（日志实际进 journal）
+LICENSE  PRIVACY.md  THIRD-PARTY-NOTICES.md   许可与隐私原文（离线可读）
 ```
 
 ## 权限声明
@@ -171,12 +176,45 @@ TOSAppSelfTestingTool_amd64 -c dist/ssdplus_x86_64.deb   # -> check passed
 
 安装包通过 GitHub Release 发布，平台从 Release 拉取，不接受其他传包方式：
 
-- Tag 形如 `v1.0.1`，同一个 Release 里放两个架构的包，**不放其他格式**
+- Tag 形如 `v1.0.2`，同一个 Release 里放两个架构的包，**不放其他格式**
 - **发新版要新建 Release，不要替换旧 Release 的资产**：平台在提交版本时会对包做 sha256
   基线，审核时重新下载比对，替换同一 tag 下的文件会让已提交的版本校验失败
 - 资产命名：`ssdplus_x86_64.deb`、`ssdplus_aarch64.deb`（版本号从包内 `config.ini` 读，
   文件名里不需要带）
 - 架构分开提交：开发者平台上 `x86_64` 与 `aarch64` 分别创建应用、分别选包
+
+## 许可与第三方组件
+
+本项目以 **MIT** 许可发布，全文见 [LICENSE](LICENSE)。后端、前端、图标与界面图形均为原创，
+未包含任何第三方源码、脚本库、字体或图标素材；前端不加载任何 CDN 资源。
+
+运行时依赖（`python3`、`smartmontools`）由系统提供、不随包分发，`smartctl` 仅以独立进程
+方式调用命令行，不与本应用链接。逐项说明见 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)。
+包内同时放了一份在 `/usr/local/ssdplus/`，`/usr/share/doc/ssdplus/copyright` 按 Debian
+规范归档（TOS 的 dpkg 只放行 doc 目录下的 copyright）。
+
+## 隐私
+
+**所有数据只留在本机**：不联网、不上传、无遥测、无账号。读取的是硬盘的 SMART 信息与
+用户自己的设置，不涉及任何个人身份信息。
+
+- 政策全文：[PRIVACY.md](PRIVACY.md)（包内 `/usr/local/ssdplus/PRIVACY.md`）
+- 应用内入口：「应用设置」页底部 → 隐私政策
+- 保留期限：60 秒明细 90 天（可调）、小时层 730 天、天层长期；备份按份数与容量轮转
+- 删除渠道：设置页「清空历史数据」，或卸载（`postrm` 会删掉 data / logs / 配置 / 服务文件）
+
+## 平台审核项对照（1.0.2）
+
+| 审核项 | 本版本的处理 |
+|---|---|
+| C2 知识产权 | 补 `LICENSE`（MIT）、`THIRD-PARTY-NOTICES.md`、Debian `copyright`；`control` 加 `Homepage`；声明 smartmontools 为外部依赖、不随包分发 |
+| C3 隐私政策缺失 | 新增 `PRIVACY.md`，同时放进包内与应用「应用设置」页底部入口 |
+| C4 隐私政策不完整 | 政策覆盖保留期限、用户权利、安全措施、第三方共享、删除渠道五部分，中英双语 |
+| C5 隐私政策不可访问 | 公开地址 `https://github.com/HUiTHEME/ssdplus_tos/blob/main/PRIVACY.md`，应用内可直接点开；包内另有离线副本 |
+| F11 卸载后残留配置/数据 | `postrm` 在 `remove` / `purge` 下删除 `data`（数据库、设置、备份）与 `logs` |
+| F4 卸载残留文件 | 同时删除 `/etc/systemd/system/<id>.service`、`/usr/lib/systemd/system/<id>.service`、wants 链接、`/usr/www/<id>` 软链、socket 与数据卷上的安装目录；`purge` 时连应用账号一起删 |
+
+升级路径（`postrm upgrade`）不执行任何删除，只清残留 socket。
 
 ## 反馈
 

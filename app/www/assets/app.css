@@ -874,6 +874,14 @@ html, body {
 .kv dt { color: var(--muted); }
 .kv dd { margin: 0; color: var(--text-2); word-break: break-all; }
 
+/* 设置页底部的版本 / 许可 / 隐私入口 */
+.about-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; font-size: 12.5px; }
+.about-foot .about-name { color: var(--text-2); }
+.about-foot .about-name b { font-weight: 600; }
+.about-foot .about-links { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-left: auto; }
+.about-foot a { color: var(--blue); text-decoration: none; }
+.about-foot a:hover { text-decoration: underline; }
+
 /* ---------------------------------------------------------------- 提示 */
 .toast {
   position: fixed;
